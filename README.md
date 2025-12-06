@@ -164,3 +164,12 @@ void session_loop(Session* session) {
     delete session;
 }
 ```
+
+# 接口文档
+
+## 后端接口
+
+前端json接口：Content-Type application/json
+表单：其他
+
+登录路径 "/api/login"
