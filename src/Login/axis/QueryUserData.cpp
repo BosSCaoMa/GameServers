@@ -55,10 +55,10 @@ bool IsUserExists(const std::string &username)
     }
 }
 
-bool InsertUserInfo(const string& username, const string pwd, const string invCode)
+bool InsertUserInfo(const std::string& username, const std::string pwd, const std::string invCode)
 {
     auto now = std::chrono::system_clock::now();
-    string nowStr = std::to_string(
+    std::string nowStr = std::to_string(
         std::chrono::duration_cast<std::chrono::seconds>(
             now.time_since_epoch()
         ).count()

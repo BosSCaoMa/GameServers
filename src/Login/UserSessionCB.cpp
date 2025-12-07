@@ -1,8 +1,8 @@
 #include "UserSessionCB.h"
 #include <memory>
 #include "LogM.h"
+#include "EventLoop.h"
 // 前置声明并使用全局 EventLoop 指针
-class EventLoop;
 using namespace std;
 extern EventLoop* g_eventLoop;
 

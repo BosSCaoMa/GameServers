@@ -24,9 +24,9 @@
     sendBuffer==空 → 取消 EPOLLOUT
 */
 using json = nlohmann::json;
-inline const std::string& status_text(int code);
+const std::string& status_text(int code);
 
-inline bool send_json_response(int client_fd, int statusCode, const json& bodyJson, bool keepAlive = true,
+bool send_json_response(int client_fd, int statusCode, const json& bodyJson, bool keepAlive = true,
     const std::vector<std::pair<std::string, std::string>>& extraHeaders = {});
 
 #endif // HTTP_RESPONSE_H

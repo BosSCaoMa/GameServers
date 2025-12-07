@@ -7,16 +7,18 @@
 #include "UserSessionCB.h"
 #include "ParseHttp.h"
 #include "SafetyPwd.h"
+#include "QueryUserData.h"
 #include <memory>
 using namespace std;
 // 全局EventLoop实例 - 在实际项目中可能通过单例或依赖注入管理
 extern EventLoop* g_eventLoop;
 
-void BuildSession(const HttpRequest& request, std::shared_ptr<Client> client, const std::string& token)
+void BuildSession(HttpRequest& request, std::shared_ptr<Client> client, const std::string& token)
 {
     // 这里可以创建会话信息，设置用户状态等
     LOG_DEBUG("Building session for client fd=%d", client->getFd());
-    UserSessionManager::getInstance().createSession(token, request.getParam("username"), client->getFd());
+    string key = "username";
+    UserSessionManager::getInstance().createSession(token, request.getParam(key), client->getFd());
     // 将认证成功的连接交给EventLoop管理
     // EventLoop会接管这个连接的后续读写事件
     if (g_eventLoop) {
@@ -37,7 +39,7 @@ void SendLoginSuccessResponse(std::shared_ptr<Client> client, const std::string&
     send_json_response(client_fd, 200, responseJson, true);
 }
 
-bool ProcLoginRequest(const HttpRequest& request, std::shared_ptr<Client> client)
+bool ProcLoginRequest(HttpRequest& request, std::shared_ptr<Client> client)
 {
     int client_fd = client->getFd();
     string username = request.getParam("username");

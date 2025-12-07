@@ -134,7 +134,7 @@ void HttpRequest::ParseJsonBody()
         body_type = BodyType::JSON;
     }
     catch (const exception& e) {
-        LOG_ERROR("Failed to parse JSON body: {}", e.what());
+        LOG_ERROR("Failed to parse JSON body: {%s}", e.what());
         body_type = BodyType::NONE;
     }
 }

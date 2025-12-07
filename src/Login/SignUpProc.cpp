@@ -11,7 +11,7 @@ bool VerifyInvCode(const std::string& invCode)
     return invCode == "test123";
 }
 
-bool ProcSignUpRequest(const HttpRequest &request, std::shared_ptr<Client> client)
+bool ProcSignUpRequest(HttpRequest &request, std::shared_ptr<Client> client)
 {
     int client_fd = client->getFd();
     string username = request.getParam("username");
@@ -35,5 +35,5 @@ bool ProcSignUpRequest(const HttpRequest &request, std::shared_ptr<Client> clien
         send_json_response(client_fd, 500, {{"error", "Database error"}}, false);
         return false; // 认证失败，连接应该关闭
     }
-    return SUCCESS;
+    return true;
 }

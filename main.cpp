@@ -18,7 +18,7 @@ int main()
     }
     
     // 设置日志级别
-    LogM::getInstance().setLevel(LogLevel::DEBUG);
+    LogM::getInstance().setLevel(DEBUG);
     
     // 数据库连接是个较慢的操作，建议程序启动时就初始化连接池
     string pwd;

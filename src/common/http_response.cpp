@@ -1,6 +1,6 @@
 #include "http_response.h"
 
-inline const std::string& status_text(int code)
+const std::string& status_text(int code)
 {
     static const std::unordered_map<int, std::string> kStatusText = {
         {200, "OK"},
@@ -19,7 +19,7 @@ inline const std::string& status_text(int code)
     return (it != kStatusText.end()) ? it->second : kUnknown;
 }
 
-inline bool write_all(int fd, const char* data, size_t len)
+static bool write_all(int fd, const char* data, size_t len)
 {
     while (len > 0) {
         ssize_t n = ::write(fd, data, len);
@@ -38,8 +38,8 @@ inline bool write_all(int fd, const char* data, size_t len)
     return true;
 }
 
-inline bool send_json_response(int client_fd, int statusCode, const json& bodyJson, bool keepAlive = true,
-    const std::vector<std::pair<std::string, std::string>>& extraHeaders = {})
+bool send_json_response(int client_fd, int statusCode, const json& bodyJson, bool keepAlive,
+    const std::vector<std::pair<std::string, std::string>>& extraHeaders)
 {
     // 1. 序列化 JSON
     std::string body = bodyJson.dump();  // 如需美化，可 dump(4)

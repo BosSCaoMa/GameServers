@@ -41,6 +41,7 @@ file(GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
 add_executable(MyGameServer ${MAIN_SRC} ${COMMON_SRC})
 
+
 # ==== 链接库 ====
 target_link_libraries(MyGameServer
     ${LIBSODIUM_LIBRARIES}  # libsodium
@@ -49,4 +50,7 @@ target_link_libraries(MyGameServer
     # 某些发行版库名可能是 mysqlcppconn8，如果链接报错就改成这个
 
     Threads::Threads        # CMake 官方推荐的线程库写法
+
+    # 自己的日志库目标
+    ${PROJECT_SOURCE_DIR}/lib/libLogM.so
 )

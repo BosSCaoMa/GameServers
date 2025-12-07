@@ -103,6 +103,6 @@ private:
 };
 
 
-DBConnPool& GetUserDBPool(DBConnInfo info);
-DBConnPool& GetGameDBPool(DBConnInfo info);
+DBConnPool& GetUserDBPool(DBConnInfo info = {});
+DBConnPool& GetGameDBPool(DBConnInfo info = {});
 #endif // CONNECTION_POOL_H

@@ -4,9 +4,9 @@
 #include <memory>
 #include "Client.h"
 
-class HttpRequest;
+#include "ParseHttp.h"
 
 // 返回true表示连接已交给EventLoop管理，false表示连接应该关闭
-bool ProcLoginRequest(const HttpRequest& request, std::shared_ptr<Client> client);
+bool ProcLoginRequest(HttpRequest& request, std::shared_ptr<Client> client);
 
 #endif // LOGIN_PROC_H
