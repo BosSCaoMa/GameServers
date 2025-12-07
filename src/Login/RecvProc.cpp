@@ -1,12 +1,15 @@
 #include "RecvProc.h"
 #include "LogM.h"
-#include <sys/socket.h> // socket
-#include <netinet/in.h> // sockaddr_in，AF_INET 常量
-#include <stdio.h>      // 基础输入输出（如 perror 打印错误信息）
-#include <stdlib.h>     // 标准库（如 exit 函数
+#include <sys/socket.h>  // socket
+#include <netinet/in.h>  // sockaddr_in，AF_INET 常量
+#include <arpa/inet.h>   // inet_addr
+#include <unistd.h>      // close, read
+#include <stdio.h>       // 基础输入输出（如 perror 打印错误信息）
+#include <stdlib.h>      // 标准库（如 exit 函数
 #include "json.hpp"
 #include <memory>
 #include <thread>
+#include <errno.h>       // errno
 
 #include "SafetyPwd.h"
 #include "Client.h"
@@ -50,13 +53,17 @@ void handle_client(std::shared_ptr<Client> client)
         LOG_ERROR("Unknown API endpoint: %s", request.getPath().c_str());
     }
     
-    // 如果连接没有被EventLoop接管，让Client析构时自动关闭
-    // 如果连接被EventLoop接管，Client的所有权已转移，这里不会关闭
+    /* 生命周期管理说明：
+     * - keepConnection=true: EventLoop持有client的shared_ptr，连接保持打开
+     * - keepConnection=false: 只有本函数持有client，函数结束后引用计数归0，
+     *   Client析构函数会自动close(fd)，连接关闭
+     */
     if (keepConnection) {
-        LOG_DEBUG("Connection fd=%d transferred to EventLoop", client_fd);
+        LOG_DEBUG("Connection fd=%d transferred to EventLoop, keep-alive", client_fd);
+        // client的shared_ptr被EventLoop持有，不会被关闭
     } else {
-        LOG_DEBUG("Connection fd=%d will be closed", client_fd);
-        // Client会在函数结束时自动析构并关闭连接
+        LOG_DEBUG("Connection fd=%d will be closed on function exit", client_fd);
+        // 函数结束时client引用计数归0，析构函数关闭连接
     }
 }
 
