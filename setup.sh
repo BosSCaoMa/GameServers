@@ -10,3 +10,7 @@ if ! pkg-config --exists libsodium; then
 else
     echo "libsodium 已安装"
 fi
+
+mkdir build && cd build
+cmake ..
+make -j$(nproc)

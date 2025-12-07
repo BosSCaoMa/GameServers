@@ -15,17 +15,13 @@
 #include "Client.h"
 #include "HttpRequest.h"
 #include "LoginProc.h"
+#include "SignUpProc.h"
 using namespace std;
 
 
-void ProcRegisterRequest(const HttpRequest& request, std::shared_ptr<Client> client)
-{
-
-}
-
 void handle_client(std::shared_ptr<Client> client)
 {
-    int client_fd = client.getFd();
+    int client_fd = client->getFd();
     LOG_DEBUG("Handling new client: fd=%d", client_fd);
 
     std::string raw;
@@ -48,7 +44,7 @@ void handle_client(std::shared_ptr<Client> client)
     if (request.getPath() == "/api/login") {
         keepConnection = ProcLoginRequest(request, client);
     } else if (request.getPath() == "/api/register") {
-        ProcRegisterRequest(request, client);
+        auto res = ProcSignUpRequest(request, client);
     } else {
         LOG_ERROR("Unknown API endpoint: %s", request.getPath().c_str());
     }

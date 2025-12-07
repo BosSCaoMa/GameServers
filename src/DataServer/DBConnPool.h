@@ -74,7 +74,7 @@ private:
 
 class ConnectionPoolAgent {
 public:
-    explicit ConnectionPoolAgent(ConnectionPool* pool,
+    explicit ConnectionPoolAgent(DBConnPool* pool,
                                  int retryIntervalMs = 10)
         : pool_(pool)
     {
@@ -99,7 +99,7 @@ public:
     explicit operator bool() const { return conn_ != nullptr; }
 
 private:
-    ConnectionPool* pool_;
+    DBConnPool* pool_;
     std::shared_ptr<sql::Connection> conn_;
 };
 

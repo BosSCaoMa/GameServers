@@ -174,7 +174,7 @@ void session_loop(Session* session) {
 表单：其他
 
 登录路径 "/api/login"
-
+邀请码：string InvCode = request.getParam("invCode");
 
 ### 数据库
 `查询密码 SELECT password_hash FROM sys_user WHERE username = ?`

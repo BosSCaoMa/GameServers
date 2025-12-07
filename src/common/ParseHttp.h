@@ -25,7 +25,7 @@ private:
     bool body_parsed = false;
     std::string method;
     std::string path;
-    std::map<std::string, std::string> headers;
+    std::unordered_map<std::string, std::string> headers;
     
     BodyType body_type = BodyType::NONE;
     std::string body;

@@ -1,32 +1,44 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.16)
 project(MyGameServer)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ==== 新增：通过 pkg-config 找 libsodium ====
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBSODIUM REQUIRED libsodium)
+find_package(MySQL REQUIRED)
+find_package(Threads REQUIRED)
 
 # 1. 包含头文件目录（库的头文件 + 项目自身头文件）
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include  # 项目自身头文件
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/include  # 动态库的头文件（若有）
-    ${LIBSODIUM_INCLUDE_DIRS}
-)
-
-# 2. 指定动态库所在目录（若库在系统路径如 /usr/lib 可省略）
-link_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib
-    ${LIBSODIUM_LIBRARY_DIRS} # <-- 新增：libsodium 库目录
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DataServer
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Login/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Connect/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Login/axis
+    ${LIBSODIUM_INCLUDE_DIRS}
+    ${MYSQL_INCLUDE_DIRS}
 )
 
-# 3. 收集源文件
-file(GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+# Collect all source files
+file(GLOB_RECURSE COMMON_SRC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/common/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DataServer/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Login/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Login/axis/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Connect/*.cpp
+)
 
+file(GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
-add_executable(MyGameServer ${MAIN_SRC})
+add_executable(MyGameServer ${MAIN_SRC} ${COMMON_SRC})
 
+# Link libraries
 target_link_libraries(MyGameServer
-    LogM
-    ${LIBSODIUM_LIBRARIES}                       # <-- 新增：链接 libsodium
+    ${LIBSODIUM_LIBRARIES}
+    ${MYSQL_LIBRARIES}
+    mysqlcppconn
+    Threads::Threads
 )

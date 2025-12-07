@@ -91,12 +91,23 @@ std::shared_ptr<sql::Connection> DBConnPool::getConnection()
 
 shared_ptr<sql::Connection> DBConnPool::createConnection()
 {
-    std::shared_ptr<sql::Connection> conn(
-        driver_->connect(host_, user_, password_)
-    );
-    conn->setSchema(database_);
-
-    return conn;
+    try {
+        std::shared_ptr<sql::Connection> conn(
+            driver_->connect(host_, user_, password_)
+        );
+        conn->setSchema(database_);
+        
+        // 验证连接是否真的可用
+        if (!isConnectionValid(conn)) {
+            throw sql::SQLException("Connection validation failed after creation");
+        }
+        
+        LOG_DEBUG("Successfully created and validated new DB connection");
+        return conn;
+    } catch (const sql::SQLException& e) {
+        LOG_ERROR("Failed to create DB connection: %s, code: %d", e.what(), e.getErrorCode());
+        throw; // 重新抛出异常让调用者处理
+    }
 }
 
 void DBConnPool::returnConnection(std::shared_ptr<sql::Connection> conn)
