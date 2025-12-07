@@ -4,13 +4,11 @@
 #include <memory>
 #include "Client.h"
 #include "HttpRequest.h"
-enum class SignUpResult {
-    SUCCESS,
-    USER_ALREADY_EXISTS,
-    INVCODE_INVALID,
-    DATABASE_ERROR
-};
+#include "http_response.h"
+#include "SafetyPwd.h"
+#include "QueryUserData.h"
 
-SignUpResult ProcSignUpRequest(const HttpRequest& request, std::shared_ptr<Client> client);
+bool ProcSignUpRequest(const HttpRequest& request, std::shared_ptr<Client> client);
+bool VerifyInvCode(const std::string& invCode);
 
 #endif // SIGNUPPROC_H

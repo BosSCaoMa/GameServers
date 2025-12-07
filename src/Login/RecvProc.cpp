@@ -44,7 +44,7 @@ void handle_client(std::shared_ptr<Client> client)
     if (request.getPath() == "/api/login") {
         keepConnection = ProcLoginRequest(request, client);
     } else if (request.getPath() == "/api/register") {
-        auto res = ProcSignUpRequest(request, client);
+        keepConnection = ProcSignUpRequest(request, client);
     } else {
         LOG_ERROR("Unknown API endpoint: %s", request.getPath().c_str());
     }
