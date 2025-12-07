@@ -13,7 +13,7 @@
 
 #include "SafetyPwd.h"
 #include "Client.h"
-#include "HttpRequest.h"
+#include "parseHttp.h"
 #include "LoginProc.h"
 #include "SignUpProc.h"
 using namespace std;

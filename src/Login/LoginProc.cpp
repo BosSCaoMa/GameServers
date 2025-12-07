@@ -1,10 +1,12 @@
 #include "LoginProc.h"
 #include "LogM.h"
-#include "HttpResponse.h"
+#include "http_response.h"
 #include "SafetyPwd.h"
 #include "Client.h"
 #include "EventLoop.h"
 #include "UserSessionCB.h"
+#include "ParseHttp.h"
+#include "SafetyPwd.h"
 #include <memory>
 using namespace std;
 // 全局EventLoop实例 - 在实际项目中可能通过单例或依赖注入管理

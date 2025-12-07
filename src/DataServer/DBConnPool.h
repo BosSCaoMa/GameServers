@@ -13,7 +13,8 @@
 #include <mysql_connection.h>
 #include <cppconn/prepared_statement.h>
 #include <cppconn/exception.h>
-
+#include <cppconn/resultset.h>
+#include <memory>
 enum class UserRole {
     User = 0,
     Admin = 1
@@ -35,8 +36,6 @@ struct UserInfo {
     UserRole role = UserRole::User;
 };
 
-DBConnPool& GetUserDBPool(DBConnInfo info);
-DBConnPool& GetGameDBPool(DBConnInfo info);
 class DBConnPool {
 public:
     DBConnPool(const std::string& host, const std::string& user, const std::string& password,
@@ -67,7 +66,7 @@ private:
 
     sql::Driver* driver_{nullptr};
 
-    shared_ptr<sql::Connection> createConnection(); // 创建新连接
+    std::shared_ptr<sql::Connection> createConnection(); // 创建新连接
 
     bool isConnectionValid(std::shared_ptr<sql::Connection> conn); // 验证连接是否有效
 };
@@ -104,4 +103,6 @@ private:
 };
 
 
+DBConnPool& GetUserDBPool(DBConnInfo info);
+DBConnPool& GetGameDBPool(DBConnInfo info);
 #endif // CONNECTION_POOL_H
