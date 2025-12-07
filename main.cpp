@@ -6,6 +6,8 @@
 
 using namespace std;
 
+EventLoop* g_eventLoop = nullptr;
+
 int main()
 {
     if (sodium_init() < 0) {
@@ -21,5 +23,15 @@ int main()
     DBConnInfo userDbInfo{"tcp://127.0.0.1:3306", "user", "password", "gamedb"};
     auto gamePool = GetGameDBPool();
 
+    EventLoop eventLoop;
+    g_eventLoop = &eventLoop;
+    std::thread eventThread([&eventLoop]() {
+        eventLoop.loop();
+    });
 
+    // 启动登录服务器
+    ProcLoginReq(9000);
+    
+    eventThread.join();
+    return 0;
 }

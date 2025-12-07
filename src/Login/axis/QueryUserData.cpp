@@ -1,6 +1,6 @@
 #include "QueryUserData.h"
 #include "DBConnPool.h"
-
+#include "LogM.h"
 std::string queryUserPwd(const std::string &username)
 {
     ConnectionPoolAgent dbAgent(*GetUserDBPool());

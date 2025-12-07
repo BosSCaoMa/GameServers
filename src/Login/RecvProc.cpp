@@ -5,30 +5,24 @@
 #include <stdio.h>      // 基础输入输出（如 perror 打印错误信息）
 #include <stdlib.h>     // 标准库（如 exit 函数
 #include "json.hpp"
+#include <memory>
+#include <thread>
 
 #include "SafetyPwd.h"
-
+#include "Client.h"
+#include "HttpRequest.h"
+#include "LoginProc.h"
 using namespace std;
-void ProcLoginRequest(const HttpRequest& request, int client_fd)
-{
-    string username = request.getParam("username");
-    string password = request.getParam("password");
-    
-    if (verifyPassword(password, queryUserPwd(username))) {
 
-    }
 
-    // 发送失败响应给客户端
-    
-}
-
-void ProcRegisterRequest(const HttpRequest& request, int client_fd)
+void ProcRegisterRequest(const HttpRequest& request, std::shared_ptr<Client> client)
 {
 
 }
 
-void handle_client(int client_fd)
+void handle_client(std::shared_ptr<Client> client)
 {
+    int client_fd = client.getFd();
     LOG_DEBUG("Handling new client: fd=%d", client_fd);
 
     std::string raw;
@@ -36,7 +30,6 @@ void handle_client(int client_fd)
     int n = read(client_fd, &raw[0], raw.size() - 1);
     if (n <= 0) {
         LOG_ERROR("Read from client failed or connection closed");
-        close(client_fd);
         return;
     }
     raw.resize(n);
@@ -44,20 +37,27 @@ void handle_client(int client_fd)
     HttpRequest request(raw);
     if (!request.isValid()) {
         LOG_ERROR("Invalid HTTP request");
-        close(client_fd);
         return;
     }
 
     // 处理请求
+    bool keepConnection = false;
     if (request.getPath() == "/api/login") {
-        ProcLoginRequest(request, client_fd);
+        keepConnection = ProcLoginRequest(request, client);
     } else if (request.getPath() == "/api/register") {
-        ProcRegisterRequest(request, client_fd);
+        ProcRegisterRequest(request, client);
     } else {
         LOG_ERROR("Unknown API endpoint: %s", request.getPath().c_str());
     }
-
-    // close(client_fd); webserver 可能会继续使用连接
+    
+    // 如果连接没有被EventLoop接管，让Client析构时自动关闭
+    // 如果连接被EventLoop接管，Client的所有权已转移，这里不会关闭
+    if (keepConnection) {
+        LOG_DEBUG("Connection fd=%d transferred to EventLoop", client_fd);
+    } else {
+        LOG_DEBUG("Connection fd=%d will be closed", client_fd);
+        // Client会在函数结束时自动析构并关闭连接
+    }
 }
 
 int ProcLoginReq(int port)
@@ -97,7 +97,8 @@ int ProcLoginReq(int port)
             LOG_ERROR("Accept failed");
             continue;
         }
-        std::thread t(parase, client_fd);
+        auto client = std::make_shared<Client>(client_fd); // RAII 管理客户端连接
+        std::thread t(handle_client, client);
         t.detach();
     }
     close(server_fd);
