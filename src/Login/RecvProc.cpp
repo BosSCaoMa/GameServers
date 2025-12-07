@@ -6,8 +6,19 @@
 #include <stdlib.h>     // 标准库（如 exit 函数
 #include "json.hpp"
 
+#include "SafetyPwd.h"
+
+using namespace std;
 void ProcLoginRequest(const HttpRequest& request, int client_fd)
 {
+    string username = request.getParam("username");
+    string password = request.getParam("password");
+    
+    if (verifyPassword(password, queryUserPwd(username))) {
+
+    }
+
+    // 发送失败响应给客户端
     
 }
 

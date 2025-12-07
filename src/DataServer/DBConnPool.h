@@ -19,6 +19,15 @@ enum class UserRole {
     Admin = 1
 };
 
+struct DBConnInfo
+{
+    std::string host;
+    std::string user;
+    std::string password;
+    std::string database;
+};
+
+
 struct UserInfo {
     std::string name;
     std::string email;
@@ -26,6 +35,8 @@ struct UserInfo {
     UserRole role = UserRole::User;
 };
 
+DBConnPool& GetUserDBPool(DBConnInfo info);
+DBConnPool& GetGameDBPool(DBConnInfo info);
 class DBConnPool {
 public:
     DBConnPool(const std::string& host, const std::string& user, const std::string& password,

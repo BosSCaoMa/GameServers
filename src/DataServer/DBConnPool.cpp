@@ -2,6 +2,19 @@
 #include "LogM.h"
 
 using namespace std;
+
+DBConnPool& GetUserDBPool(DBConnInfo info)
+{
+    static DBConnPool pool(info.host, info.user, info.password, info.database);
+    return pool;
+}
+
+DBConnPool& GetGameDBPool(DBConnInfo info)
+{
+    static DBConnPool pool(info.host, info.user, info.password, info.database);
+    return pool;
+}
+
 DBConnPool::DBConnPool(const std::string &host, const std::string &user, const std::string &password,
     const std::string &database, int maxConnections, int minConnections)
     : host_(host), user_(user), password_(password), database_(database),
@@ -75,7 +88,6 @@ std::shared_ptr<sql::Connection> DBConnPool::getConnection()
         return nullptr;
     }
 }
-
 
 shared_ptr<sql::Connection> DBConnPool::createConnection()
 {

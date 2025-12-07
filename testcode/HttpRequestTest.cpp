@@ -30,8 +30,8 @@ TEST_F(HttpRequestTest, ParseJsonRequest) {
     EXPECT_EQ(http.getHeader("Authorization"), " Bearer token123");
     EXPECT_EQ(http.getHeader("Content-Type"), " application/json");
 
-    EXPECT_EQ(http.getBodyParam("goods_id"), "123");
-    EXPECT_EQ(http.getBodyParam("count"), "2");
+    EXPECT_EQ(http.getParam("goods_id"), "123");
+    EXPECT_EQ(http.getParam("count"), "2");
 
     const auto& j = http.getJson();
     EXPECT_TRUE(j.contains("goods_id"));
@@ -56,10 +56,10 @@ TEST_F(HttpRequestTest, ParseFormRequest) {
 
     EXPECT_EQ(http.getHeader("Content-Type"), " application/x-www-form-urlencoded");
 
-    EXPECT_EQ(http.getBodyParam("a"), "1 b");
-    EXPECT_EQ(http.getBodyParam("name"), "John Doe");
-    EXPECT_EQ(http.getBodyParam("plus"), "+");
-    EXPECT_EQ(http.getBodyParam("space"), " ");
+    EXPECT_EQ(http.getParam("a"), "1 b");
+    EXPECT_EQ(http.getParam("name"), "John Doe");
+    EXPECT_EQ(http.getParam("plus"), "+");
+    EXPECT_EQ(http.getParam("space"), " ");
 
     const auto& j = http.getJson();
     EXPECT_TRUE(j.is_null() || j.empty());

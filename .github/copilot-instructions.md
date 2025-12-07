@@ -9,7 +9,7 @@
 
 ## HTTP Handling Patterns
 - `HttpRequest` header values keep the leading space after `:` (e.g., `" Host" -> " example.com"`); trim manually if you need a clean value. Body helpers already return trimmed data.
-- Body parsing is deferred until `getBodyParam`/`getJson` is called. Always call those helpers instead of manually decoding `body` so the lazy state stays coherent.
+- Body parsing is deferred until `getParam`/`getJson` is called. Always call those helpers instead of manually decoding `body` so the lazy state stays coherent.
 - When adding new endpoints, mirror the existing pattern: string-compare on `getPath()`, process, then either write to `client_fd` or schedule async work. Centralize socket cleanup inside `handle_client` error branches.
 - Buffering uses a fixed 8 KB stack string. For larger payloads, extend the buffer size and ensure `read` loops until the full `Content-Length` is satisfied.
 

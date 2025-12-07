@@ -169,7 +169,12 @@ void session_loop(Session* session) {
 
 ## 后端接口
 
+### 前端
 前端json接口：Content-Type application/json
 表单：其他
 
 登录路径 "/api/login"
+
+
+### 数据库
+`查询密码 SELECT password_hash FROM sys_user WHERE username = ?`

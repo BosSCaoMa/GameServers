@@ -55,7 +55,7 @@ string HttpRequest::getHeader(const string& key) const {
     return "";
 }
 
-string HttpRequest::getBodyParam(const string& key)
+string HttpRequest::getParam(const string& key)
 {
     if (!body_parsed) {
         ParseBody();

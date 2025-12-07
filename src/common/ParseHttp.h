@@ -19,7 +19,7 @@ public:
     std::string getPath() const { return path; }
     std::string getHeader(const std::string& key) const;
     
-    std::string getBodyParam(const std::string& key);
+    std::string getParam(const std::string& key);
     const nlohmann::json& getJson();
 private:
     bool body_parsed = false;
@@ -38,13 +38,4 @@ private:
     static std::string UrlDecode(const std::string& str);
     static std::string Trim(const std::string& s);
 };
-
-class HttpResponse {
-public:
-    int status_code;
-    std::string status_message;
-    std::map<std::string, std::string> headers;
-    std::string body;
-};
-
 #endif // PARSE_HTTP_H
