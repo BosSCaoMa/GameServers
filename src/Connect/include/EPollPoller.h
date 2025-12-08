@@ -22,6 +22,7 @@ public:
     void addClient(std::shared_ptr<Client> client, uint32_t events);
     void updateClient(int fd, uint32_t events);
     void removeClient(int fd);
+    std::shared_ptr<Client> getClient(int fd) const; // 获取指定fd的Client
     
 private:
     void fillActiveClients(int numEvents, ClientList* activeClients);

@@ -58,6 +58,7 @@ private:
 
     ~UserSessionManager() = default;
     void auditSessions();
+    std::string buildSessionExpiredResponse(const std::string& token); // 构造会话过期响应
     UserSessionManager(const UserSessionManager&) = delete;
     UserSessionManager& operator=(const UserSessionManager&) = delete;
 

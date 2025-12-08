@@ -27,6 +27,15 @@ public:
     // 线程安全的方式添加连接到EventLoop  
     void addClient(std::shared_ptr<Client> client);
     void removeClient(int fd);
+    void updateClient(std::shared_ptr<Client> client); // 更新客户端监听的事件
+    std::shared_ptr<Client> getClient(int fd); // 获取指定fd的Client
+
+    // 便捷函数：发送数据到客户端
+    void sendToClient(int fd, const std::string& data, 
+                     std::function<void()> writeCompleteCallback = nullptr);
+    
+    // 便捷函数：发送数据后关闭连接
+    void sendAndClose(int fd, const std::string& data);
 
     // 在EventLoop线程中执行函数
     void runInLoop(Functor cb);

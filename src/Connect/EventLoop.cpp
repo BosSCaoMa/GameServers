@@ -97,6 +97,32 @@ void EventLoop::removeClient(int fd)
     }
 }
 
+void EventLoop::updateClient(std::shared_ptr<Client> client)
+{
+    if (isInLoopThread()) {
+        poller_->updateClient(client->getFd(), client->getEvents());
+    } else {
+        runInLoop([this, client]() {
+            poller_->updateClient(client->getFd(), client->getEvents());
+        });
+    }
+}
+
+std::shared_ptr<Client> EventLoop::getClient(int fd)
+{
+    if (isInLoopThread()) {
+        return poller_->getClient(fd);
+    } else {
+        // 跨线程访问需要同步
+        std::shared_ptr<Client> result;
+        runInLoop([this, fd, &result]() {
+            result = poller_->getClient(fd);
+        });
+        // 注意：这里会阻塞等待，实际使用中可能需要异步回调方式
+        return result;
+    }
+}
+
 void EventLoop::runInLoop(Functor cb)
 {
     if (isInLoopThread()) {
@@ -162,6 +188,7 @@ void EventLoop::handleClient(std::shared_ptr<Client> client)
     // 错误事件 - 优先处理
     if (revents & (EPOLLERR | EPOLLHUP)) {
         LOG_ERROR("Client fd=%d error or hangup event", fd);
+        client->handleError();
         removeClient(fd);
         return;
     }
@@ -174,9 +201,10 @@ void EventLoop::handleClient(std::shared_ptr<Client> client)
         if (n > 0) {
             // 收到数据，处理游戏协议
             LOG_DEBUG("EventLoop received %ld bytes from fd=%d", n, fd);
-            // TODO: 解析游戏协议，分发到相应的处理器
-            // 例如：handleGameMessage(client, buffer, n);
-            handleGameMessage(client, buffer, n);
+            // 如果设置了回调，则调用回调；否则使用默认处理
+            client->handleRead(buffer, n);
+            // 兼容旧代码：如果没有设置回调，调用handleGameMessage
+            // handleGameMessage(client, buffer, n);
         } else if (n == 0) {
             // 对端关闭连接
             LOG_DEBUG("Client fd=%d disconnected", fd);
@@ -185,11 +213,82 @@ void EventLoop::handleClient(std::shared_ptr<Client> client)
             // 读取错误（errno会被设置）
             if (errno != EAGAIN && errno != EWOULDBLOCK) {
                 LOG_ERROR("EventLoop::handleClient read error for fd=%d, errno=%d", fd, errno);
+                client->handleError();
                 removeClient(fd);
             }
         }
     }
     
-    // 注意：当前只监听EPOLLIN，不会收到EPOLLOUT事件
-    // 如果将来需要处理写缓冲，可以在这里添加EPOLLOUT处理
+    // 写事件处理
+    if (revents & EPOLLOUT) {
+        if (client->hasDataToWrite()) {
+            const std::string& buffer = client->getOutputBuffer();
+            ssize_t n = ::write(fd, buffer.data(), buffer.size());
+            
+            if (n > 0) {
+                LOG_DEBUG("EventLoop wrote %ld bytes to fd=%d", n, fd);
+                client->clearOutputBuffer(n);
+                
+                // 如果写完了，禁用写事件监听
+                if (!client->hasDataToWrite()) {
+                    client->disableWriting();
+                    updateClient(client);
+                    client->handleWriteComplete();
+                }
+            } else {
+                // 写错误
+                if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                    LOG_ERROR("EventLoop::handleClient write error for fd=%d, errno=%d", fd, errno);
+                    client->handleError();
+                    removeClient(fd);
+                }
+            }
+        } else {
+            // 没有数据要写，禁用写事件
+            LOG_DEBUG("No data to write for fd=%d, disabling EPOLLOUT", fd);
+            client->disableWriting();
+            updateClient(client);
+        }
+    }
+}
+
+// 便捷函数：发送数据到客户端
+void EventLoop::sendToClient(int fd, const std::string& data, 
+                              std::function<void()> writeCompleteCallback)
+{
+    auto client = getClient(fd);
+    if (!client) {
+        LOG_ERROR("EventLoop::sendToClient - Client fd=%d not found", fd);
+        return;
+    }
+    
+    // 添加数据到写缓冲区
+    client->appendToOutputBuffer(data);
+    
+    // 如果还没有监听写事件，启用它
+    if (!client->isWriting()) {
+        client->enableWriting();
+    }
+    
+    // 设置写完成回调
+    if (writeCompleteCallback) {
+        client->setWriteCompleteCallback([writeCompleteCallback](Client* c) {
+            writeCompleteCallback();
+        });
+    }
+    
+    // 更新 EventLoop
+    updateClient(client);
+    
+    LOG_DEBUG("EventLoop::sendToClient - Scheduled data (%zu bytes) for fd=%d", 
+              data.size(), fd);
+}
+
+// 便捷函数：发送数据后关闭连接
+void EventLoop::sendAndClose(int fd, const std::string& data)
+{
+    sendToClient(fd, data, [this, fd]() {
+        LOG_INFO("EventLoop::sendAndClose - Data sent to fd=%d, closing connection", fd);
+        removeClient(fd);
+    });
 }

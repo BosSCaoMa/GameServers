@@ -85,6 +85,15 @@ void EPollPoller::removeClient(int fd)
     LOG_DEBUG("EPollPoller::removeClient fd=%d", fd);
 }
 
+std::shared_ptr<Client> EPollPoller::getClient(int fd) const
+{
+    auto it = clients_.find(fd);
+    if (it != clients_.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
 void EPollPoller::fillActiveClients(int numEvents, ClientList* activeClients)
 {
     for (int i = 0; i < numEvents; ++i) {
