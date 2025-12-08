@@ -1,4 +1,13 @@
 
+## 运行逻辑
+
+用户发起登录请求，到达ProcLoginReq监听的端口，ProcLoginReq会起一个线程，进行处理。
+然后handle_client会处理该请求，如果登录成功，则回登录成功的响应，并携带token。
+然后创建会话，并将client添加到一个EventLoop中去。
+
+EventLoop会进行不断loop，loop中调用poll，将发生读事件的client添加到activeClient中，然后遍历处理发生事件的client
+
+
 ## 跨线程通信机制
 
 问题：

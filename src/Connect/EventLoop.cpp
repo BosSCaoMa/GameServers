@@ -4,7 +4,7 @@
 #include "LogM.h"
 #include <sys/eventfd.h>
 #include <unistd.h>
-
+#include "GameRecvProc.h"
 EventLoop::EventLoop()
     : looping_(false),
       quit_(false),
@@ -176,7 +176,7 @@ void EventLoop::handleClient(std::shared_ptr<Client> client)
             LOG_DEBUG("EventLoop received %ld bytes from fd=%d", n, fd);
             // TODO: 解析游戏协议，分发到相应的处理器
             // 例如：handleGameMessage(client, buffer, n);
-            
+            handleGameMessage(client, buffer, n);
         } else if (n == 0) {
             // 对端关闭连接
             LOG_DEBUG("Client fd=%d disconnected", fd);
