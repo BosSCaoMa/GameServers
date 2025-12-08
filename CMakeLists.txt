@@ -19,6 +19,8 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Login/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Connect/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Login/axis
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Game/include
+
 
     # libsodium 头文件
     ${LIBSODIUM_INCLUDE_DIRS}
@@ -33,6 +35,7 @@ file(GLOB_RECURSE COMMON_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/common/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DataServer/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Login/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Game/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Login/axis/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Connect/*.cpp
 )
