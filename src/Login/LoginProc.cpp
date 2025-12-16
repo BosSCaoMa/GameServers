@@ -8,6 +8,7 @@
 #include "ParseHttp.h"
 #include "SafetyPwd.h"
 #include "QueryUserData.h"
+#include "GameRecvProc.h"
 #include <memory>
 using namespace std;
 // 全局EventLoop实例 - 在实际项目中可能通过单例或依赖注入管理
@@ -23,6 +24,10 @@ void BuildSession(HttpRequest& request, std::shared_ptr<Client> client, const st
     // EventLoop会接管这个连接的后续读写事件
     // todo 未来会有多个EventLoop，通过负载均衡算法进行选择
     if (g_eventLoop) {
+        // 关键：在移交给 EventLoop 之前，为该连接设置读回调（协议/业务处理）
+        client->setReadCallback([](Client* c, const char* data, ssize_t len) {
+            handleGameMessage(c, data, static_cast<size_t>(len));
+        });
         g_eventLoop->addClient(client);
         LOG_DEBUG("Client fd=%d added to EventLoop", client->getFd());
     }

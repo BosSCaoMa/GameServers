@@ -97,6 +97,11 @@ int ProcLoginReq(int port)
         sockaddr_in client_addr{};
         socklen_t client_len = sizeof(client_addr);
         int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
+        /*
+        Q:这个时候会给对端回复吗？
+        A:accept(...) 只建立 TCP 连接，不会给对端“回复任何应用层数据”。
+            TCP 层：accept 完成三次握手后返回新 client_fd，此时只是建立了传输通道；没有自动发送任何应用数据。
+        */
         if (client_fd < 0) {
             LOG_ERROR("Accept failed");
             continue;

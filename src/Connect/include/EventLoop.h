@@ -28,7 +28,8 @@ public:
     void addClient(std::shared_ptr<Client> client);
     void removeClient(int fd);
     void updateClient(std::shared_ptr<Client> client); // 更新客户端监听的事件
-    std::shared_ptr<Client> getClient(int fd); // 获取指定fd的Client
+    // 获取指定fd的Client（仅限 EventLoop 线程内调用；跨线程请用 runInLoop/queueInLoop）
+    std::shared_ptr<Client> getClient(int fd);
 
     // 便捷函数：发送数据到客户端
     void sendToClient(int fd, const std::string& data, 
@@ -48,6 +49,8 @@ private:
     void doPendingFunctors();
     void wakeup();
     void handleClient(std::shared_ptr<Client> client); // 处理客户端事件
+
+    void sendToClientInLoop(int fd, std::string data, std::function<void()> writeCompleteCallback);
 
     std::atomic<bool> looping_;
     std::atomic<bool> quit_;
